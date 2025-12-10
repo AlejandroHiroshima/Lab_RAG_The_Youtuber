@@ -1,5 +1,5 @@
 import lancedb
-from backend.constants import VECTOR_DATABASE_PATH, DATA_PATH
+from backend.utils import VECTOR_DATABASE_PATH, DATA_PATH
 from backend.data_models import Transcript
 import time
 
