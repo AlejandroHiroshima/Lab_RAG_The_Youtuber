@@ -5,13 +5,13 @@ import time
 
 def setup_vector_db(path):
     path.mkdir(exist_ok=True)
-    vector_db = lancedb.connect(uri= path)
+    vector_db = lancedb.connect(uri= str(path))
     vector_db.create_table("transcripts", schema=Transcript, exist_ok = True)
 
     return vector_db
 
 def ingest_to_vectordb(table):
-    for file in DATA_PATH.glob("*txt"):
+    for file in DATA_PATH.glob("*.txt"):
         with open(file, "r", encoding="utf-8") as f:
             content = f.read()
         

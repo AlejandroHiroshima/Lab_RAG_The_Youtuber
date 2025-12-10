@@ -12,7 +12,7 @@ class Transcript(LanceModel):
     filepath: str
     filename: str = Field(description="Name of the file, without the suffix")
     content: str = embedding_model.SourceField()
-    embedding: Vector(3072) = embedding_model.VectorField()
+    embedding: Vector(embedding_model.ndims()) = embedding_model.VectorField()
 
 class Prompt(BaseModel):
     prompt: str = Field(description="prompt from the user")

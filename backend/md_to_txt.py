@@ -1,4 +1,4 @@
-from constants import DATA_PATH
+from utils import DATA_PATH
 
 
 def remove_duplicates():

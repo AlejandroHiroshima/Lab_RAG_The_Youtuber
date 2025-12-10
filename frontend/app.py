@@ -1,8 +1,12 @@
 import streamlit as st
 import requests
+from pathlib import Path
+
+APP_DIR = Path(__file__).parent
+IMAGE_PATH = APP_DIR / "image.png"
 
 def layout():
-    st.image("image.png")
+    st.image(str(IMAGE_PATH))
     st.markdown("#🙌Ask the almighty Youtuber🙌")
     input = st.text_input(label= "Enter your data related question")
 
