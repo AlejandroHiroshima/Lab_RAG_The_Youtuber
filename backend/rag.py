@@ -27,8 +27,9 @@ def retrieve_best_matches(query: str, top_result=3) -> str:
     "Vector search to find the best matches for the query from the user."
     result = vector_db["transcripts"].search(query=query).limit(top_result).to_list()
 
-    return f"""
-    Filename: {result[0]["filename"]},
-    Filepath: {result[0]["filepath"]},
-    Content: {result[0]["content"]}
-    """
+    #part below if with help of an LLM
+    context = "\n".join([
+        f"Filename: {doc['filename']}\nFilepath: {doc['filepath']}\nContent: {doc['content']}"
+        for doc in result
+    ])
+    return context
