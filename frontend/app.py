@@ -4,6 +4,7 @@ from pathlib import Path
 
 APP_DIR = Path(__file__).parent
 IMAGE_PATH = APP_DIR / "image.png"
+API_URL= "http://127.0.0.1:8000"
 
 def init_session_states():
     if "messages" not in st.session_state:
@@ -14,19 +15,43 @@ def display_chat_messages():
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
+# below function (call_rag_api) is from LLM
+def call_rag_api(prompt: str) -> dict:
+    try:
+        response = requests.post(
+            f"{API_URL}/rag/query",
+            json={"prompt": prompt},
+            timeout=20
+        )
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        st.error(f"❌ Error calling API: {e}")
+        return None
+
 def handle_user_input():
     if prompt := st.chat_input("Enter your data related question"):
         st.session_state.messages.append({"role": "user", "content": prompt})
 
-        bot_response = st.session_state.bot.chat(prompt).get("bot")
-        response = f"The Youtuber: {bot_response}"
-
         with st.chat_message("user"):
             st.markdown(prompt)
         with st.chat_message("assistant"):
-            st.markdown(response)
+            response = call_rag_api(prompt)
+        if response:
+            answer = response.get("answer", "The Youtuber is tired, try again later")
+            filename = response.get("filename", "Unknown")
+            filepath= response.get("filepath")
+            response_text = f"**The Youtuber:** {answer}"
+            st.markdown(response_text)
+        else: 
+            error_message= "The Youtuber is busy, try again later!"
+            st.markdown(error_message)
 
-        st.session_state.messages.append({"role": "assistant", "content": response})
+        st.session_state.messages.append({
+            "role": "assistant", 
+            "content": response_text, 
+            "filename": filename, 
+            "filepath": filepath})
 
 def layout():
     st.image(str(IMAGE_PATH))

@@ -8,9 +8,9 @@ load_dotenv()
 embedding_model= get_registry().get("gemini-text").create(name="gemini-embedding-001")
 
 class Transcript(LanceModel):
-    doc_id: str
-    filepath: str
-    filename: str = Field(description="Name of the file, without the suffix")
+    doc_id: str = Field(description="unique identifier for the file")
+    filepath: str = Field(description="path of the file")
+    filename: str = Field(description="Name of the file, without the suffix, same as doc_id right now")
     content: str = embedding_model.SourceField()
     embedding: Vector(embedding_model.ndims()) = embedding_model.VectorField()
 
