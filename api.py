@@ -1,11 +1,16 @@
 from fastapi import FastAPI
-from backend.rag import rag_agent
+from backend.rag import ChatBot
 from backend.data_models import Prompt
 
 app = FastAPI()
+chatbot = ChatBot()
 
 @app.post("/rag/query")
 async def query_documentation(query: Prompt):
-    result = await rag_agent.run(query.prompt)
+    result = await chatbot.run(query.prompt)
 
-    return result.output
+    return result["bot"]
+
+@app.get("/rag/history")
+async def get_history():
+    return chatbot.get_history()

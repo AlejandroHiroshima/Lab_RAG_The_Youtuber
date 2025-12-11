@@ -24,7 +24,8 @@ class ChatBot:
         ), output_type= RagResponse,
         )
         self.result = None
-        # Part below thank to LLM
+
+        # Parts below much thanks to LLM
         self._register_tools()
     def _register_tools(self):
         """Registrera RAG-verktyget på agenten"""
@@ -37,41 +38,25 @@ class ChatBot:
                 f"Filename: {doc['filename']}\nFilepath: {doc['filepath']}\nContent: {doc['content']}"
                 for doc in result
             ])
-            
             return context
+        
+    async def chat(self, prompt: str) -> dict:
+        message_history= self.result.all_messages() if self.result else None
+        self.result = await self.chat_agent.run(prompt, message_history=message_history)
 
+        return {
+            "user": prompt,
+            "bot": self.result.output
+        }
+    
+    def get_history(self)-> list[dict]:
+        if not self.result:
+            return []
+        history = []
 
-
-
-
-
-
-
-
-
-
-
-
-rag_agent = Agent(model= "google-gla:gemini-2.5-flash", retries= 2, system_prompt=(
-    personality_LMM_analysis,
-    "You are very knowledgeable in data science and data engineering",
-    "Always answer on retrieved knowledge, but you can mix in your own expertise to make the answer more coherent",
-    "never hallucinate. If you don't know the answer, just say you can't answer the users prompt based on your retrieved knowledge",
-    "Make sure to answer short and concise, getting to the point directly, max 6 sentences",
-    "Also describe which file you've used",
-    "Very unlikely, but if somehow possible, since you also love rabbits and the book 'The Hitchhiker's Guide to the Galaxy' make funny references to both",
-    "Also say 'Supah cool!', whenever fit"
-), output_type= RagResponse,
-)
-
-@rag_agent.tool_plain
-def retrieve_best_matches(query: str, top_result=3) -> str:
-    "Vector search to find the best matches for the query from the user."
-    result = vector_db["transcripts"].search(query=query).limit(top_result).to_list()
-
-    #part below if with help of an LLM
-    context = "\n".join([
-        f"Filename: {doc['filename']}\nFilepath: {doc['filepath']}\nContent: {doc['content']}"
-        for doc in result
-    ])
-    return context
+        for message in self.result.all_messages():
+            if message.role == 'user':
+                history.append({"role": "user", "content": message.content})
+            elif message.role == 'assistant':
+                history.append({"role": "assistant", "content": str(message.content)})
+        return history
