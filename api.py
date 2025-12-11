@@ -14,3 +14,7 @@ async def query_documentation(query: Prompt):
 @app.get("/rag/history")
 async def get_history():
     return chatbot.get_history()
+
+@app.get("/rag/get_videos")
+async def get_videos()
+    pass

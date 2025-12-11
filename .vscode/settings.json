@@ -1,4 +1,4 @@
 {
     "taipyStudio.gUI.elementsFilePaths": [],
-    "taipyStudio.config.mainPythonFile": "LMM_personality.py"
+    "taipyStudio.config.mainPythonFile": "ingestion.py"
 }
