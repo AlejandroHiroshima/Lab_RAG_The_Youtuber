@@ -25,10 +25,9 @@ class ChatBot:
         )
         self.result = None
 
-        # Parts below much thanks to LLM
+        # function below much thanks to LLM
         self._register_tools()
     def _register_tools(self):
-        """Registrera RAG-verktyget på agenten"""
         @self.chat_agent.tool_plain
         def retrieve_best_matches(query: str, top_result=3) -> str:
             "Vector search to find the best matches for the query from the user."

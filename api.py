@@ -1,9 +1,12 @@
 from fastapi import FastAPI
 from backend.rag import ChatBot
 from backend.data_models import Prompt
+from backend.utils import VECTOR_DATABASE_PATH
+import lancedb
 
 app = FastAPI()
 chatbot = ChatBot()
+vector_db= lancedb.connect(uri = str(VECTOR_DATABASE_PATH))
 
 @app.post("/rag/query")
 async def query_documentation(query: Prompt):
@@ -15,6 +18,9 @@ async def query_documentation(query: Prompt):
 async def get_history():
     return chatbot.get_history()
 
-@app.get("/rag/get_videos")
-async def get_videos()
-    pass
+@app.get("/rag/videos")
+async def list_videos():
+    table = vector_db['transcripts']
+    df = table.to_pandas()
+    filenames = df['filename'].to_list()
+    return {"videos": filenames}
