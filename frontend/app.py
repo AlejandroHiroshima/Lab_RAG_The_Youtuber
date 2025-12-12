@@ -37,15 +37,19 @@ def handle_user_input():
             st.markdown(prompt)
         with st.chat_message("assistant"):
             response = call_rag_api(prompt)
+        response_text= "The Youtuber is busy, try again later!"
+        filename= "Unknown"
+        filepath = None
         if response:
-            answer = response.get("answer", "The Youtuber is tired, try again later")
-            filename = response.get("filename", "Unknown")
-            filepath= response.get("filepath")
+            answer = response.get("answer", response_text)
+            filename = response.get("filename", filename)
+            filepath= response.get("filepath", filepath)
             response_text = f"**The Youtuber:** {answer}"
-            st.markdown(response_text)
+            st.markdown(f"""{response_text} \n
+            Source transcript: **{filename}**
+            """)
         else: 
-            error_message= "The Youtuber is busy, try again later!"
-            st.markdown(error_message)
+            st.markdown(response_text)
 
         st.session_state.messages.append({
             "role": "assistant", 
@@ -55,7 +59,7 @@ def handle_user_input():
 
 def layout():
     st.image(str(IMAGE_PATH))
-    st.markdown("#🙌Ask the almighty Youtuber🙌")
+    st.markdown("# Consult the almighty Youtuber🙌")
     display_chat_messages()
     handle_user_input()
 

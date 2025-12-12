@@ -61,7 +61,7 @@ async def make_tags(filename: str):
     Transcript:
     {content}
     """
-    result= await tag_agent.run(instruction)
+    result= await tag_agent.create_tags(instruction)
     return Tags(
         doc_id= filename,
         tags= result
