@@ -1,5 +1,5 @@
 from pydantic_ai import Agent
-from backend.data_models import RagResponse
+from backend.data_models import RagResponse, Tags
 from backend.utils import VECTOR_DATABASE_PATH
 import lancedb
 from pathlib import Path
@@ -59,3 +59,29 @@ class ChatBot:
             elif message.role == 'assistant':
                 history.append({"role": "assistant", "content": str(message.content)})
         return history
+
+class DescriptionAgent():
+    def __init__(self):
+        self.desc_agent = Agent(
+            model="google-gla:gemini-2.5-flash", 
+            retries=2, 
+            system_prompt="You make short and engaging summaries of youtube transcripts. Maximum 6 sentences, no hallucinations",
+            output_type= str)
+        
+    async def run(self, instruction:str) -> str:
+        self.result = await self.desc_agent.run(instruction)
+        return self.result.output
+    
+class TagsAgent():
+    def __init__(self):
+        self.tag_agent = Agent(
+           model="google-gla:gemini-2.5-flash", 
+            retries=2, 
+            system_prompt=("From the transcript given to you, summarize to 20-40 tags for Youtube",
+                           "Return only a comma-separated list of keywords",
+                           "example format: data engineering, python, ELT, terraform, sql"),
+            output_type= str) 
+        
+    async def create_tags(self, instruction: str):
+        self.result = await self.tag_agent.run(instruction)
+        return self.result.output

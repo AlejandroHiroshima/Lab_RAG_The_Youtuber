@@ -25,3 +25,7 @@ class RagResponse(BaseModel):
 class Description(BaseModel):
     doc_id: str = Field(description="unique name of the file")
     description: str = Field(description="Short description of the contents of the transcript from it's Youtube video")
+
+class Tags(BaseModel):
+    doc_id: str = Field(description="unique name of the file")
+    tags: str = Field(description="from given transcipt, create 20-40 comma-separated Youtube tags, example: 'keyword1, keyword2, keyword3' etc...")
