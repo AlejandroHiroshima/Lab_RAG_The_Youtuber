@@ -1,10 +1,14 @@
 import streamlit as st
 import requests
 from pathlib import Path
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
 APP_DIR = Path(__file__).parent
 IMAGE_PATH = APP_DIR / "image.png"
-API_URL= "http://127.0.0.1:8000"
+API_URL= "http://127.0.0.1:7071"
+BASE_URL = f"https://ragtheyoutuber.azurewebsites.net/rag/query?code={os.getenv('APP_KEY')}"
 
 def init_session_states():
     if "messages" not in st.session_state:
@@ -19,7 +23,7 @@ def display_chat_messages():
 def call_rag_api(prompt: str) -> dict:
     try:
         response = requests.post(
-            f"{API_URL}/rag/query",
+            BASE_URL,
             json={"prompt": prompt},
             timeout=20
         )
@@ -46,7 +50,7 @@ def handle_user_input():
             filepath= response.get("filepath", filepath)
             response_text = f"**The Youtuber:** {answer}"
             st.markdown(f"""{response_text} \n
-            Source transcript: **{filename}**
+            Source transcript: *{filename}*
             """)
         else: 
             st.markdown(response_text)
