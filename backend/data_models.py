@@ -21,3 +21,7 @@ class RagResponse(BaseModel):
     filename: str = Field(description= "file name of retrieved file, without the suffix")
     filepath: str = Field(description= "absolute path to the retrieved file")
     answer: str = Field(description="answer based on the retrieved file")
+
+class Description(BaseModel):
+    doc_id: str = Field(description="unique name of the file")
+    description: str = Field(description="Short description of the contents of the transcript from it's Youtube video")

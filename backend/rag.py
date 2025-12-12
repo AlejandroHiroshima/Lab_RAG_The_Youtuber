@@ -25,7 +25,7 @@ class ChatBot:
         )
         self.result = None
 
-        # function below much thanks to LLM
+        # function (_register_tools) below is partly LLM generated
         self._register_tools()
     def _register_tools(self):
         @self.chat_agent.tool_plain
