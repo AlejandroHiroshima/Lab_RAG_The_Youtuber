@@ -10,7 +10,7 @@ embedding_model= get_registry().get("gemini-text").create(name="gemini-embedding
 class Transcript(LanceModel):
     doc_id: str = Field(description="unique identifier for the file")
     filepath: str = Field(description="path of the file")
-    filename: str = Field(description="Name of the file, without the suffix, same as doc_id right now")
+    filename: str = Field(description="Name of the file, without the suffix")
     content: str = embedding_model.SourceField()
     embedding: Vector(embedding_model.ndims()) = embedding_model.VectorField()
 
@@ -28,4 +28,4 @@ class Description(BaseModel):
 
 class Tags(BaseModel):
     doc_id: str = Field(description="unique name of the file")
-    tags: str = Field(description="from given transcipt, create 20-40 comma-separated Youtube tags, example: 'keyword1, keyword2, keyword3' etc...")
+    tags: str = Field(description="20-40 comma-separated Youtube tags, example: 'keyword1, keyword2, keyword3' etc...")

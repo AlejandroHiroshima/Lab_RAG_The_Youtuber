@@ -19,10 +19,16 @@ def get_df():
 async def query_documentation(query: Prompt):
     result = await chatbot.chat(query.prompt)
     return result["bot"]
-
+# below(history) is partly due to LLM
 @app.get("/rag/history")
 async def get_history():
-    return chatbot.get_history()
+    try:
+        history = chatbot.get_history()
+        if not history:
+            return {"message:": "No history found"}
+        return {"history": history}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Internal Server Error")
 
 @app.get("/rag/videos")
 async def list_videos():
@@ -30,7 +36,7 @@ async def list_videos():
     filenames = df['filename'].to_list()
     return {"videos": filenames}
 
-#below function is partly LLM generated
+#below functions is partly LLM generated
 @app.get("/rag/videos/{filename}/description")
 async def make_description(filename: str):
     df= get_df()

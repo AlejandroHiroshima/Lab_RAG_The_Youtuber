@@ -55,7 +55,7 @@ class ChatBot:
 
         for message in self.result.all_messages():
             if message.role == 'user':
-                history.append({"role": "user", "content": message.content})
+                history.append({"role": "user", "content": str(message.content)})
             elif message.role == 'assistant':
                 history.append({"role": "assistant", "content": str(message.content)})
         return history
