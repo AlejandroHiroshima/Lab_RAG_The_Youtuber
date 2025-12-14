@@ -1,5 +1,5 @@
 from pydantic_ai import Agent
-from backend.data_models import RagResponse, Tags
+from backend.data_models import RagResponse, Tags, Description
 from backend.utils import VECTOR_DATABASE_PATH
 import lancedb
 from pathlib import Path
@@ -23,9 +23,8 @@ class ChatBot:
         "Also say 'Supah cool!', whenever fit"
         ), output_type= RagResponse,
         )
-        self.result = None
-
-        # function (_register_tools) below is partly LLM generated
+        self.history = []
+     
         self._register_tools()
     def _register_tools(self):
         @self.chat_agent.tool_plain
@@ -38,27 +37,18 @@ class ChatBot:
                 for doc in result
             ])
             return context
-        
-    async def chat(self, prompt: str) -> dict:
-        message_history= self.result.all_messages() if self.result else None
+        # part below function much thank to LLM
+    async def chat(self, prompt: str) -> RagResponse:
+        message_history= self.history if self.history else None
         self.result = await self.chat_agent.run(prompt, message_history=message_history)
 
-        return {
-            "user": prompt,
-            "bot": self.result.output
-        }
+        rag_response: RagResponse = self.result.output
+        self.history.append({"role": "user", "content": prompt})
+        self.history.append({"role": "assistant", "content": rag_response.answer})
+        return rag_response
     
     def get_history(self)-> list[dict]:
-        if not self.result:
-            return []
-        history = []
-
-        for message in self.result.all_messages():
-            if message.role == 'user':
-                history.append({"role": "user", "content": str(message.content)})
-            elif message.role == 'assistant':
-                history.append({"role": "assistant", "content": str(message.content)})
-        return history
+        return self.history
 
 class DescriptionAgent():
     def __init__(self):
@@ -66,12 +56,16 @@ class DescriptionAgent():
             model="google-gla:gemini-2.5-flash", 
             retries=2, 
             system_prompt="You make short and engaging summaries of youtube transcripts. Maximum 6 sentences, no hallucinations",
-            output_type= str)
+            output_type= Description)
         
-    async def run(self, instruction:str) -> str:
+    async def run(self, filename: str, content: str) -> Description:
+        instruction = f"""
+        Summarize this transcript:
+        {content}
+        """
         self.result = await self.desc_agent.run(instruction)
         return self.result.output
-    
+
 class TagsAgent():
     def __init__(self):
         self.tag_agent = Agent(
@@ -80,8 +74,14 @@ class TagsAgent():
             system_prompt=("From the transcript given to you, summarize to 20-40 tags for Youtube",
                            "Return only a comma-separated list of keywords",
                            "example format: data engineering, python, ELT, terraform, sql"),
-            output_type= str) 
+            output_type= Tags) 
         
-    async def create_tags(self, instruction: str):
+    async def create_tags(self, filename: str, content: str) -> Tags:
+        instruction = f"""
+        Create singleword, comma-separated Youtube tags from this transcript,
+        return only the tags, no extra text, no numbering etc.
+        Transcript:
+        {content}
+        """
         self.result = await self.tag_agent.run(instruction)
         return self.result.output

@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException
-from backend.rag import ChatBot, DescriptionAgent, TagsAgent
+from backend.rag import ChatBot, DescriptionAgent, TagsAgent, RagResponse
 from backend.data_models import Prompt, Description, Tags
 from backend.utils import VECTOR_DATABASE_PATH
 import lancedb
@@ -17,18 +17,16 @@ def get_df():
 
 @app.post("/rag/query")
 async def query_documentation(query: Prompt):
-    result = await chatbot.chat(query.prompt)
-    return result["bot"]
+    result: RagResponse = await chatbot.chat(query.prompt)
+    return result
+
 # below(history) is partly due to LLM
 @app.get("/rag/history")
 async def get_history():
-    try:
-        history = chatbot.get_history()
-        if not history:
-            return {"message:": "No history found"}
-        return {"history": history}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+    history = chatbot.get_history()
+    if not history:
+        return {"message": "No history found"}
+    return {"history": history}
 
 @app.get("/rag/videos")
 async def list_videos():
@@ -44,15 +42,8 @@ async def make_description(filename: str):
     if match.empty:
         raise HTTPException(status_code=404, detail=f" Video/Transcript '{filename}' don't exist in database")
     content = match.iloc[0]['content']
-    instruction = f"""
-    Summarize this transcript:
-    {content}
-    """
-    result = await desc_bot.run(instruction)
-    return Description(
-        doc_id = filename,
-        description = result
-    )
+    result: Description = await desc_bot.run(filename, content)
+    return result
 
 @app.get("/rag/videos/{filename}/tags")
 async def make_tags(filename: str):
@@ -61,14 +52,5 @@ async def make_tags(filename: str):
     if match.empty:
         raise HTTPException(status_code=404, detail=f" Video/Transcript '{filename}' don't exist in database")
     content = match.iloc[0]['content']
-    instruction = f"""
-    Create singleword, comma-separated Youtube tags from this transcript,
-    return only the tags, no extra text, no numbering etc.
-    Transcript:
-    {content}
-    """
-    result= await tag_agent.create_tags(instruction)
-    return Tags(
-        doc_id= filename,
-        tags= result
-    )
+    result: Tags = await tag_agent.create_tags(filename, content)
+    return result

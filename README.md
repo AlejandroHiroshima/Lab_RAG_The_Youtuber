@@ -15,7 +15,18 @@ uv init
 ```bash
 uv sync
 ```
-
+Se till att du har din Google API nyckel sparad såhär i en fil som heter .env i projekt rooten:
+```env
+GOOGLE_API_KEY=din_google_api_nyckel_här
+```
+Konvertera .md-filer till .txt och ta bort dubbletter: Innan du kan indexera dina filer i databasen, måste du först konvertera .md-filer till .txt samt ta bort eventuella dubbletter:
+```bash
+uv run backend/md_to_text.py
+```
+Indexera data i LanceDB och generera vektorer: För att fylla databasen med dina dokument och skapa vektorer för sökning, kör:
+```bash
+uv run ingestion.py
+```
 
 ## Starta API't
 ```bash
