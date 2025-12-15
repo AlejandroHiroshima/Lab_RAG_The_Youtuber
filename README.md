@@ -32,13 +32,13 @@ uv run ingestion.py
 ```bash
 uv run uvicorn api:app --reload
 ```
-Öppna http://127.0.0.1:8000/docs för att kolla in flera endpoints
+Öppna http://127.0.0.1:8000/docs för att kolla in flera endpoints. OBS! notera att nedan frontend app inte är beroende av du kör kommandot ovan, utan det är mer för att utforsta olika endpoints
 <img src="assets/2.png" alt="Bild 1" width="700">
 ## Starta frontend appen
 ```bash
 uv run streamlit run frontend/app.py
 ```
-Öppna http://localhost:8501
+Öppna http://localhost:8501 
 <img src="assets/1.png" alt="Bild 1" width="700">
 
 
